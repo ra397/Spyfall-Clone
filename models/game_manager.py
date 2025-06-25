@@ -11,15 +11,20 @@ class GameManager:
         self.games[game.code] = game
         return game
     
-    def join_game(self, game_code, player_name):
-        if game_code not in self.games:
+    def join_game(self, code, player_name):
+        if code not in self.games:
             return None, "Game DNE"
-        
-        player = Player(player_name)
-        game = self.games[game_code]
-        game.add_player(player)
 
-        return game
+        game = self.games[code]
+        if game.has_started():
+            return None, "Game already started"
+
+        if player_name in game.get_player_names():
+            return None, "Name already taken"
+
+        player = Player(player_name)
+        game.add_player(player)
+        return game, None
     
     def get_game(self, code):
         return self.games[code]

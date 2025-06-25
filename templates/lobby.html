@@ -11,11 +11,15 @@
         <li>{{ player }}</li>
       {% endfor %}
     </ul>
+    {% if is_owner %}
+      <button id="start-button">Start Game</button>
+    {% endif %}
 
     <script>
       const socket = io('http://localhost:5000');
       const code = "{{ code }}";
-
+      const isOwner = {{ is_owner | tojson }};
+      
       socket.emit('join_lobby', { code });
 
       socket.on('player_joined', function(data) {
@@ -24,6 +28,16 @@
         item.textContent = data.name;
         list.appendChild(item);
       });
+
+      socket.on('start_game', () => {
+        window.location.href = `/games/${code}/start`;
+      });
+
+      if (isOwner) {
+        document.getElementById('start-button').addEventListener('click', () => {
+          socket.emit('start_game', { code });
+        });
+      }
     </script>
   </body>
 </html>
