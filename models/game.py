@@ -38,6 +38,14 @@ class Game:
                     player.current_occupation = occupations.pop()
                 else:
                     player.current_occupation = "bystander" # if we run out of occupations
+
+    def reset(self):
+        self.current_location = None
+        self.in_session = False
+        self.start_time = None
+        for player in self.players:
+            player.set_occupation(None)
+
     def has_started(self):
         return self.in_session
     

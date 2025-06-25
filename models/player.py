@@ -3,7 +3,7 @@ class Player:
         self.name = name
         self.current_occupation = None
 
-    def set_occupation(self, occupation : str):
+    def set_occupation(self, occupation):
         self.current_occupation = occupation
 
     def get_occupation(self):

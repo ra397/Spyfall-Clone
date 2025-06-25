@@ -63,6 +63,7 @@ def game_page(code):
     is_spy = current_player.is_spy()
     location = game.current_location if not is_spy else None
     start_time = int(game.get_start_time())
+    is_owner = (game.owner.name == name)
 
     return render_template(
         'game.html',
@@ -71,7 +72,8 @@ def game_page(code):
         occupation=occupation,
         location=location,
         is_spy=is_spy,
-        start_time=start_time
+        start_time=start_time,
+        is_owner=is_owner
     )
 
 @socketio.on('join_lobby')
@@ -85,6 +87,16 @@ def handle_start_game(data):
     if game and not game.has_started():
         game.start()
         emit('start_game', to=code)
+
+
+@socketio.on('end_round')
+def handle_end_round(data):
+    code = data['code']
+    print(f"End round for game {code}")
+    game = manager.get_game(code)
+    if game:
+        game.reset()
+        emit('round_ended', {'code': code}, to=code)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
-  <head><title>Game Started</title></head>
+  <head>
+    <title>Game Started</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  </head>
   <body>
     <h1>Welcome, {{ name }}</h1>
 
@@ -15,30 +18,52 @@
 
     <div id="timer">08:00</div>
 
-      <script>
-    const startTime = {{ start_time }};
-    const totalSeconds = 8 * 60;  // 8 minutes
+    {% if is_owner %}
+      <button id="end-round">End Round</button>
+    {% endif %}
 
-    function updateTimer() {
-      const now = Math.floor(Date.now() / 1000);
-      const elapsed = now - startTime;
-      const remaining = Math.max(0, totalSeconds - elapsed);
+    <script>
+      const socket = io('http://localhost:5000');
+      const code = "{{ code }}";
+      const playerName = "{{ name }}";
+      const isOwner = {{ is_owner | tojson }};
 
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
+      socket.emit('join_lobby', { code });
 
-      const timerElement = document.getElementById('timer');
-      timerElement.textContent =
-        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const startTime = {{ start_time }};
+      const totalSeconds = 8 * 60;  // 8 minutes
 
-      if (remaining > 0) {
-        setTimeout(updateTimer, 1000);
-      } else {
-        timerElement.textContent = "Time's up!";
+      function updateTimer() {
+        const now = Math.floor(Date.now() / 1000);
+        const elapsed = now - startTime;
+        const remaining = Math.max(0, totalSeconds - elapsed);
+
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+
+        const timerElement = document.getElementById('timer');
+        timerElement.textContent =
+          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (remaining > 0) {
+          setTimeout(updateTimer, 1000);
+        } else {
+          timerElement.textContent = "Time's up!";
+        }
       }
-    }
 
-    updateTimer();
-  </script>
+      updateTimer();
+
+      if (isOwner) {
+        document.getElementById('end-round').addEventListener('click', () => {
+          socket.emit('end_round', { code });
+        });
+      }
+
+      socket.on('round_ended', (data) => {
+        window.location.href = `/games/${data.code}/lobby?name=${encodeURIComponent(playerName)}`;
+        console.log("Round ended recieved!!");
+      });
+    </script>
   </body>
 </html>
