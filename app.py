@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_socketio import SocketIO, emit, join_room
 from models.game_manager import GameManager
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 
 manager = GameManager()
 
@@ -31,6 +34,7 @@ def join_game():
     joined = manager.join_game(code, name)
     if joined is None:
         return f"Game not found"
+    socketio.emit('player_joined', {'name': name}, room=code)
     return redirect(url_for('view_lobby', code=code))
 
 @app.route('/games/<code>/lobby')
@@ -38,3 +42,7 @@ def view_lobby(code):
     game = manager.get_game(code)
     players = game.get_player_names()
     return render_template('lobby.html', code=code, players=players)
+
+@socketio.on('join_lobby')
+def handle_join_lobby(data):
+    join_room(data['code'])

@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  </head>
   <body>
     <h2>Game Code: {{ code }}</h2>
     <h3>Players in Lobby:</h3>
-    <ul>
+    <ul id="player-list">
       {% for player in players %}
         <li>{{ player }}</li>
       {% endfor %}
     </ul>
+
+    <script>
+      const socket = io('http://localhost:5000');
+      const code = "{{ code }}";
+
+      socket.emit('join_lobby', { code });
+
+      socket.on('player_joined', function(data) {
+        const list = document.getElementById('player-list');
+        const item = document.createElement('li');
+        item.textContent = data.name;
+        list.appendChild(item);
+      });
+    </script>
   </body>
 </html>
