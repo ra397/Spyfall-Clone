@@ -12,6 +12,10 @@ class Game:
         self.current_location = None
         self.in_session = False
         self.start_time = None
+        self.time_of_last_activity = time.time()
+
+    def touch(self):
+        self.time_of_last_activity = time.time()
 
     def generate_game_code(self, length=5):
         return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))

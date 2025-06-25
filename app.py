@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room
 from models.game_manager import GameManager
+import threading
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -86,6 +88,7 @@ def handle_start_game(data):
     game = manager.get_game(code)
     if game and not game.has_started():
         game.start()
+        game.touch()
         emit('start_game', to=code)
 
 
@@ -96,7 +99,24 @@ def handle_end_round(data):
     game = manager.get_game(code)
     if game:
         game.reset()
+        game.touch()
         emit('round_ended', {'code': code}, to=code)
 
+def cleanup_expired_games():
+    while True:
+        time.sleep(300)  # Check every 5 minutes
+        now = time.time()
+        expiration_seconds = 30 * 60  # 30 minutes
+
+        to_delete = []
+        for code, game in list(manager.games.items()):
+            if now - game.last_active_time > expiration_seconds:
+                print(f"[CLEANUP] Removing inactive game {code}")
+                to_delete.append(code)
+
+        for code in to_delete:
+            del manager.games[code]
+
 if __name__ == '__main__':
+    threading.Thread(target=cleanup_expired_games, daemon=True).start()
     socketio.run(app, debug=True)
