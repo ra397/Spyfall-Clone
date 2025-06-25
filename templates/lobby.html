@@ -16,7 +16,7 @@
     {% endif %}
 
     <script>
-      const socket = io('http://localhost:5000');
+      const socket = io();
       const code = "{{ code }}";
       const isOwner = {{ is_owner | tojson }};
       const playerName = "{{ name }}";
