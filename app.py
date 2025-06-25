@@ -48,11 +48,31 @@ def view_lobby(code):
     game = manager.get_game(code)
     players = game.get_player_names()
     is_owner = (game.owner.name == name)
-    return render_template('lobby.html', code=code, players=players, is_owner=is_owner)
+    return render_template('lobby.html', code=code, players=players, is_owner=is_owner, name=name)
 
 @app.route('/games/<code>/start')
 def game_page(code):
-    return render_template('game.html', code=code)
+    name = request.args.get('name', '')
+    game = manager.get_game(code)
+
+    current_player = next((p for p in game.players if p.name == name), None)
+    if not current_player:
+        return "Error: player not in game"
+
+    occupation = current_player.get_occupation()
+    is_spy = current_player.is_spy()
+    location = game.current_location if not is_spy else None
+    start_time = int(game.get_start_time())
+
+    return render_template(
+        'game.html',
+        code=code,
+        name=name,
+        occupation=occupation,
+        location=location,
+        is_spy=is_spy,
+        start_time=start_time
+    )
 
 @socketio.on('join_lobby')
 def handle_join_lobby(data):

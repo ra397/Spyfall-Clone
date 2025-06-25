@@ -6,5 +6,8 @@ class Player:
     def set_occupation(self, occupation : str):
         self.current_occupation = occupation
 
+    def get_occupation(self):
+        return self.current_occupation
+
     def is_spy(self):
         return self.current_occupation == "spy"

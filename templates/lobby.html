@@ -19,6 +19,7 @@
       const socket = io('http://localhost:5000');
       const code = "{{ code }}";
       const isOwner = {{ is_owner | tojson }};
+      const playerName = "{{ name }}";
       
       socket.emit('join_lobby', { code });
 
@@ -30,7 +31,7 @@
       });
 
       socket.on('start_game', () => {
-        window.location.href = `/games/${code}/start`;
+        window.location.href = `/games/${code}/start?name=${encodeURIComponent(playerName)}`;
       });
 
       if (isOwner) {

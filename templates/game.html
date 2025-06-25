@@ -1,10 +1,44 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Game Page</title>
-</head>
-<body>
-  <h1>Game Started!</h1>
-  <p>Welcome to the game. Code: {{ code }}</p>
-</body>
+  <head><title>Game Started</title></head>
+  <body>
+    <h1>Welcome, {{ name }}</h1>
+
+    {% if is_spy %}
+      <p><strong>You are the <span style="color:red">SPY</span>!</strong></p>
+      <p>Your job is to figure out the location.</p>
+    {% else %}
+      <p><strong>Location:</strong> {{ location }}</p>
+    {% endif %}
+
+    <p><strong>Your Occupation:</strong> {{ occupation }}</p>
+
+    <div id="timer">08:00</div>
+
+      <script>
+    const startTime = {{ start_time }};
+    const totalSeconds = 8 * 60;  // 8 minutes
+
+    function updateTimer() {
+      const now = Math.floor(Date.now() / 1000);
+      const elapsed = now - startTime;
+      const remaining = Math.max(0, totalSeconds - elapsed);
+
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+
+      const timerElement = document.getElementById('timer');
+      timerElement.textContent =
+        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (remaining > 0) {
+        setTimeout(updateTimer, 1000);
+      } else {
+        timerElement.textContent = "Time's up!";
+      }
+    }
+
+    updateTimer();
+  </script>
+  </body>
 </html>

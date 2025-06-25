@@ -1,5 +1,6 @@
 import random
 import string
+import time
 from models.player import Player
 from models.constants import locations_occupations
 
@@ -10,6 +11,7 @@ class Game:
         self.players = [owner]
         self.current_location = None
         self.in_session = False
+        self.start_time = None
 
     def generate_game_code(self, length=5):
         return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
@@ -23,6 +25,7 @@ class Game:
 
     def start(self):
         self.in_session = True
+        self.start_time = time.time()
         self.current_location = random.choice(list(locations_occupations.keys()))
         occupations = locations_occupations[self.current_location][:]
         spy = random.choice(self.players)
@@ -37,6 +40,9 @@ class Game:
                     player.current_occupation = "bystander" # if we run out of occupations
     def has_started(self):
         return self.in_session
+    
+    def get_start_time(self):
+        return self.start_time
 
     def get_player_names(self):
         return [player.name for player in self.players]
